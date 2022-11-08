@@ -1,0 +1,75 @@
+blueprint:
+  name: Smartthings IKEA Two Button Remote
+  description: |
+    Use IKEA Remote To Trigger Actions
+
+  domain: automation
+  input:
+    entered_id:
+      name: 'Switch Device ID (Required)'
+      selector:
+        text:
+    button_up_short:
+      name: Up button - short press
+      description: Action to run on short brightness up press
+      default: []
+      selector:
+        action:
+    button_up_long:
+      name: Up button - long press
+      description: Action to run on long brightness up press
+      default: []
+      selector:
+        action:
+    button_down_short:
+      name: Down button - short press
+      description: Action to run on short brightness down press
+      default: []
+      selector:
+        action:
+    button_down_long:
+      name: Down button - long press
+      description: Action to run on long brightness down press
+      default: []
+      selector:
+        action:
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: event
+    event_type: smartthings.button
+
+action:
+
+  - variables:
+      compare_id: !input 'entered_id'
+      switch_id: "{{ trigger.event.data.device_id }}"
+      button_id: "{{ trigger.event.data.component_id }}"
+      action_type: "{{ trigger.event.data.value }}"
+
+  - choose:
+      - conditions:
+          - "{{ action_type == 'pushed' }}"
+          - "{{ switch_id == compare_id}}"
+          - "{{ button_id == 'button2' }}"
+        sequence: !input button_up_short
+
+      - conditions:
+          - "{{ action_type == 'held' }}"
+          - "{{ switch_id == compare_id}}"
+          - "{{ button_id == 'button2' }}"
+        sequence: !input button_up_long
+
+      - conditions:
+          - "{{ action_type == 'pushed' }}"
+          - "{{ switch_id == compare_id}}"
+          - "{{ button_id == 'button1' }}"
+        sequence: !input button_down_short
+
+      - conditions:
+          - "{{ action_type == 'held' }}"
+          - "{{ switch_id == compare_id}}"
+          - "{{ button_id == 'button1' }}"
+        sequence: !input button_down_long
